@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/kylegrantlucas/pia-wg-config/pia"
 	cli "github.com/urfave/cli/v2"
@@ -51,6 +52,27 @@ func main() {
 	}
 }
 
+func parseField(field string) (value string) {
+	if field == "" {
+		return ""
+	}
+	fileInfo, err := os.Stat(field)
+	// If directory, then error
+	if fileInfo.IsDir() {
+		return ""
+		// If not a file, then assume it is plaintext
+	} else if os.IsNotExist(err) {
+		return field
+		// Otherwise read the file
+	} else {
+		dat, err := os.ReadFile(field)
+		if err != nil {
+			return ""
+		}
+		return strings.TrimSpace(string(dat))
+	}
+}
+
 func defaultAction(c *cli.Context) error {
 	// Validate arguments
 	if c.NArg() < 2 {
@@ -70,8 +92,8 @@ func defaultAction(c *cli.Context) error {
 	}
 
 	// get username and password
-	username := c.Args().Get(0)
-	password := c.Args().Get(1)
+	username := parseField(c.Args().Get(0))
+	password := parseField(c.Args().Get(1))
 	verbose := c.Bool("verbose")
 	region := c.String("region")
 

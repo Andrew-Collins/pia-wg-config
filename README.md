@@ -29,7 +29,33 @@ This will show you the complete list of PIA server regions you can connect to.
 
 ## 🚀 Quick Start
 
-### Installation
+### Install Go
+
+#### Linux
+
+```bash
+sudo apt-get update && sudo apt-get install golang-go
+
+# define go installation location and add to path
+go env -w GOPATH=$HOME/go
+echo "export GOPATH=\$HOME/go" >> ~/.bash_profile
+echo "export PATH=\$PATH:\$GOPATH/bin" >> ~/.bash_profile
+source ~/.bash_profile
+```
+
+#### macOS
+
+```bash
+brew install go
+
+# define go installation location and add to path
+go env -w GOPATH=$HOME/go
+echo "export GOPATH=\$HOME/go" >> ~/.zshenv
+echo "export PATH=\$PATH:\$GOPATH/bin" >> ~/.zshenv
+source ~/.zshenv
+```
+
+### Install pia-wg-config
 
 ```bash
 go install github.com/kylegrantlucas/pia-wg-config@latest

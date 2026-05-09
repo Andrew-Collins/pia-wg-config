@@ -57,8 +57,11 @@ func parseField(field string) (value string) {
 		return ""
 	}
 	fileInfo, err := os.Stat(field)
-	// If directory, then error
-	if fileInfo.IsDir() {
+
+	// If err, assume plaintext
+	if err != nil {
+		return field
+	} else if fileInfo.IsDir() {
 		return ""
 		// If not a file, then assume it is plaintext
 	} else if os.IsNotExist(err) {

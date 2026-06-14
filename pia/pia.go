@@ -82,6 +82,11 @@ type piaServerList struct {
 }
 
 type AddKeyResult struct {
+	server     Server
+	keyReponse AddKeyReponse
+}
+
+type AddKeyReponse struct {
 	Status     string   `json:"status"`
 	ServerKey  string   `json:"server_key"`
 	ServerPort int      `json:"server_port"`
@@ -203,7 +208,8 @@ func (p *PIAClient) GetAvailableRegions() (map[Region]string, error) {
 
 // AddKey
 func (p *PIAClient) AddKey(token, publickey string) (AddKeyResult, error) {
-	var addKeyResp AddKeyResult
+	var addKeyResp AddKeyReponse
+	var result AddKeyResult
 	server := p.getWireguardServerForRegion()
 
 	// Build http request
@@ -212,16 +218,21 @@ func (p *PIAClient) AddKey(token, publickey string) (AddKeyResult, error) {
 	// Send request
 	resp, err := p.executePIARequest(server, url)
 	if err != nil {
-		return addKeyResp, errors.Wrap(err, "error executing request")
+		return result, errors.Wrap(err, "error executing request")
 	}
 
 	// Parse response
 	err = json.NewDecoder(resp.Body).Decode(&addKeyResp)
 	if err != nil {
-		return addKeyResp, errors.Wrap(err, "error decoding add key response")
+		return result, errors.Wrap(err, "error decoding add key response")
 	}
 
-	return addKeyResp, nil
+	result = AddKeyResult{
+		server:     server,
+		keyReponse: addKeyResp,
+	}
+
+	return result, nil
 }
 
 func (p *PIAClient) getWireguardServerForRegion() Server {
@@ -239,7 +250,7 @@ func (p *PIAClient) getWireguardServerForRegion() Server {
 func (p *PIAClient) getServerList() (piaServerList, error) {
 	var serverList piaServerList
 
-	resp, err := http.Get("https://serverlist.piaservers.net/vpninfo/servers/v4")
+	resp, err := http.Get("https://serverlist.piaservers.net/vpninfo/servers/v7")
 	if err != nil {
 		return piaServerList{}, err
 	}

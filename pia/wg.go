@@ -32,6 +32,7 @@ type templateConfig struct {
 	PrivateKey          string
 	PublicKey           string
 	PersistentKeepalive string
+	ServerCommonName    string
 }
 
 func NewPIAWgGenerator(pia PIAWgClient, config PIAWgGeneratorConfig) *PIAWgGenerator {
@@ -72,11 +73,12 @@ func (p *PIAWgGenerator) Generate() (string, error) {
 		return "", errors.Wrap(err, "error adding Wireguard publickey to PIA account")
 	}
 	if p.verbose {
-		log.Printf("Server IP:   %s", key.ServerIP)
-		log.Printf("Server VIP:  %s", key.ServerVip)
-		log.Printf("Peer IP:     %s", key.PeerIP)
-		log.Printf("DNS servers: %v", key.DNSServers)
-		log.Printf("Server port: %d", key.ServerPort)
+		log.Printf("Server IP:   %s", key.keyReponse.ServerIP)
+		log.Printf("Server VIP:  %s", key.keyReponse.ServerVip)
+		log.Printf("Peer IP:     %s", key.keyReponse.PeerIP)
+		log.Printf("DNS servers: %v", key.keyReponse.DNSServers)
+		log.Printf("Server port: %d", key.keyReponse.ServerPort)
+		log.Printf("Server common name: %s", key.server.Cn)
 	}
 
 	// Generate Wireguard config
@@ -124,12 +126,13 @@ func (p *PIAWgGenerator) generateConfig(key AddKeyResult, privatekey string) (st
 	// execute template
 	tc := templateConfig{
 		PrivateKey:          privatekey,
-		PublicKey:           key.ServerKey,
-		Endpoint:            key.ServerIP,
-		DNS:                 key.DNSServers[0],
-		Address:             key.PeerIP,
+		PublicKey:           key.keyReponse.ServerKey,
+		Endpoint:            key.keyReponse.ServerIP,
+		DNS:                 key.keyReponse.DNSServers[0],
+		Address:             key.keyReponse.PeerIP,
 		AllowedIPs:          "0.0.0.0/0",
 		PersistentKeepalive: "25",
+		ServerCommonName:    key.server.Cn,
 	}
 
 	var config bytes.Buffer
@@ -149,4 +152,6 @@ DNS = {{.DNS}}
 PublicKey = {{.PublicKey}}
 AllowedIPs = {{.AllowedIPs}}
 Endpoint = {{.Endpoint}}:1337
-PersistentKeepalive = {{.PersistentKeepalive}}`
+PersistentKeepalive = {{.PersistentKeepalive}}
+ServerCommonName = {{.ServerCommonName}}
+`

@@ -11,11 +11,19 @@ func (p *PIAClientMock) GetToken() (string, error) {
 }
 
 func (p *PIAClientMock) AddKey(token, publickey string) (AddKeyResult, error) {
-	return AddKeyResult{
+	var keyRepsonse = AddKeyReponse{
 		ServerIP:   "1.2.3.4",
 		DNSServers: []string{"1.1.1.1"},
 		PeerIP:     "4.5.6.7",
 		ServerKey:  publickey,
+	}
+	var server = Server{
+		Cn: "dummy",
+		IP: "1.2.3.4",
+	}
+	return AddKeyResult{
+		server:     server,
+		keyReponse: keyRepsonse,
 	}, nil
 }
 
